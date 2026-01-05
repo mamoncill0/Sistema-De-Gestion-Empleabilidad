@@ -1,8 +1,6 @@
 package AS.PE.infrastructure.exception;
 
-import AS.PE.domain.exception.ResourceNotFoundException;
-import AS.PE.domain.exception.RoleNotFoundException;
-import AS.PE.domain.exception.UnauthorizedOperationException;
+import AS.PE.domain.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -61,5 +59,31 @@ public class GlobalExceptionHandler {
                 request.getDescription(false).replace("uri=", "")
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // Añadir estos métodos a GlobalExceptionHandler.java
+
+    @ExceptionHandler(ProjectActivationException.class)
+    public ResponseEntity<ErrorResponse> handleProjectActivationException(ProjectActivationException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TaskCompletionException.class)
+    public ResponseEntity<ErrorResponse> handleTaskCompletionException(TaskCompletionException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }

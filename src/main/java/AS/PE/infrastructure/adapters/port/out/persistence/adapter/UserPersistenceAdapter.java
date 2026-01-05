@@ -5,6 +5,7 @@ import AS.PE.domain.model.enums.Role;
 import AS.PE.domain.port.out.UserRepositoryPort;
 import AS.PE.infrastructure.adapters.port.out.persistence.entity.RoleEntity;
 import AS.PE.infrastructure.adapters.port.out.persistence.entity.UserEntity;
+import AS.PE.infrastructure.adapters.port.out.persistence.mapper.UserMapper;
 import AS.PE.infrastructure.adapters.port.out.persistence.repository.RoleJpaRepository;
 import AS.PE.infrastructure.adapters.port.out.persistence.repository.UserJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,28 +20,30 @@ public class UserPersistenceAdapter implements UserRepositoryPort {
 
     private final UserJpaRepository userJpaRepository;
     private final RoleJpaRepository roleJpaRepository;
+    private final UserMapper mapper;
 
     @Autowired
-    public UserPersistenceAdapter(UserJpaRepository userJpaRepository, RoleJpaRepository roleJpaRepository) {
+    public UserPersistenceAdapter(UserJpaRepository userJpaRepository, RoleJpaRepository roleJpaRepository, UserMapper mapper) {
         this.userJpaRepository = userJpaRepository;
         this.roleJpaRepository = roleJpaRepository;
+        this.mapper = mapper;
     }
 
     @Override
     public User save(User user) {
         UserEntity userEntity = toEntity(user);
         UserEntity savedEntity = userJpaRepository.save(userEntity);
-        return toDomain(savedEntity);
+        return mapper.toDomain(savedEntity);
     }
 
     @Override
     public Optional<User> findById(Long id) {
-        return userJpaRepository.findById(id).map(this::toDomain);
+        return userJpaRepository.findById(id).map(this.mapper::toDomain);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        return userJpaRepository.findByEmail(email).map(this::toDomain);
+        return userJpaRepository.findByEmail(email).map(this.mapper::toDomain);
     }
 
     @Override
@@ -79,20 +82,5 @@ public class UserPersistenceAdapter implements UserRepositoryPort {
             }
         }
         return entity;
-    }
-
-    private User toDomain(UserEntity entity) {
-        Role role = null;
-        if (entity.getRoles() != null && !entity.getRoles().isEmpty()) {
-            role = entity.getRoles().iterator().next().getName();
-        }
-        
-        return new User(
-                entity.getId(),
-                entity.getUsername(),
-                entity.getEmail(),
-                entity.getPassword(),
-                role
-        );
     }
 }
