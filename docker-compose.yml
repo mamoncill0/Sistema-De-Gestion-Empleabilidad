@@ -1,0 +1,41 @@
+services:
+  # Spring Boot Application Service
+  app:
+    # Build the Docker image from the Dockerfile in the current directory
+    build: .
+    # Name the container for easier identification
+    container_name: pe-app
+    # Restart the container automatically if it stops
+    restart: unless-stopped
+    # Map port 8080 on the host to port 8080 in the container
+    ports:
+      - "8080:8080"
+    # Environment variables for the Spring Boot application
+    # IMPORTANT: You should change these values for a production environment
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/pe_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root 
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - db
+
+  # MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: pe-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: pe_db
+    ports:
+      - "3307:3306" # Expose on 3307 to avoid conflict with local MySQL if running
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+networks:
+  default:
+    name: pe-network
+
+volumes:
+  mysql_data:
