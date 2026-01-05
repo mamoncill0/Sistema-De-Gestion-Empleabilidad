@@ -56,15 +56,18 @@ public class AuthService {
             String jwt = jwtProvider.generateJwtToken(authentication);
 
             UserEntity userDetails = (UserEntity) authentication.getPrincipal();
-            Set<String> roles = userDetails.getAuthorities().stream()
+            // Get the role and remove the "ROLE_" prefix before sending it to the frontend
+            String role = userDetails.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toSet());
+                    .findFirst()
+                    .map(auth -> auth.replace("ROLE_", ""))
+                    .orElse(null);
 
             return new AuthResponse(jwt,
                     userDetails.getId(),
                     userDetails.getUsername(),
                     userDetails.getEmail(),
-                    roles.iterator().next());
+                    role);
         } catch (BadCredentialsException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "El usuario o la contraseña es incorrecto o no existe.");
         }
@@ -82,9 +85,6 @@ public class AuthService {
         }
 
         // Creamos el usuario del dominio.
-        // Nota: El constructor de User espera (id, username, email, password, role).
-        // Pasamos null al ID porque se generará al guardar.
-        // Pasamos null al Role inicialmente, lo asignaremos después.
         User user = new User(
                 null,
                 signUpRequest.getUsername(),
@@ -100,7 +100,6 @@ public class AuthService {
             roleToAssign = roleRepositoryPort.findByName(Role.USER)
                     .orElseThrow(() -> new RoleNotFoundException("Error: Role USER is not found. This is a server configuration issue."));
         } else {
-            // Tomamos el primer rol de la lista (asumiendo que tu modelo User solo tiene un rol simple, no una lista)
             String roleName = strRoles.iterator().next();
             Role roleEnum;
             try {

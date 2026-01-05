@@ -32,17 +32,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsServiceImpl userDetailsService;
 
     // Lista de rutas que NO deben ser filtradas por el JwtAuthenticationFilter
-    private static final List<String> EXCLUDE_URLS = Arrays.asList(
+    private static final List<String> EXCLUDE_URLS = List.of(
+            "/",
+            "/index.html",
+            "/favicon.ico",
+            "/dist/**",
             "/api/auth/**",
-            "/auth/**", // <-- RUTA AÑADIDA
-            "/api-docs/**",
-            "/v3/api-docs/**",
+            "/auth/**",
+            "/error",
             "/swagger-ui/**",
-            "/swagger-ui.html",
-            "/swagger-resources/**",
-            "/webjars/**",
-            "/error"
+            "/v3/api-docs/**"
     );
+
 
     private AntPathMatcher pathMatcher = new AntPathMatcher();
 

@@ -3,14 +3,16 @@ package AS.PE.application.service;
 import AS.PE.domain.model.User;
 import AS.PE.domain.port.in.DeleteUserUseCase;
 import AS.PE.domain.port.in.GetUserUseCase;
+import AS.PE.domain.port.in.ListUsersUseCase;
 import AS.PE.domain.port.out.UserRepositoryPort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService implements GetUserUseCase, DeleteUserUseCase {
+public class UserService implements GetUserUseCase, DeleteUserUseCase, ListUsersUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
 
@@ -33,5 +35,10 @@ public class UserService implements GetUserUseCase, DeleteUserUseCase {
             return; // O simplemente no hacer nada si no existe
         }
         userRepositoryPort.deleteById(userId);
+    }
+
+    @Override
+    public List<User> listUsers() {
+        return userRepositoryPort.findAll();
     }
 }
